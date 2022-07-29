@@ -1,6 +1,6 @@
 {
   "name": "dodollar",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Lightweight, methods chaining, extended, well-encapsulated output console.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

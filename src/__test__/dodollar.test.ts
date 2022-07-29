@@ -26,5 +26,3 @@ test('error', () => {
   expect($$.error('error')).toBe($$);
   $$.separate().blankLine();
 });
-
-
