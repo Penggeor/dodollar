@@ -67,11 +67,3 @@ class DoDollar implements LightConsole {
 export default new DoDollar();
 
 export { DoDollar };
-
-const $$ = new DoDollar({
-  beforeLog: () => {
-    // $$.log('>>>>>> beforeLog');
-  },
-});
-
-$$.log('a');
