@@ -1,4 +1,4 @@
-<h1 align="center">💲 DoDollar 💲 </h1>
+<h1 align="center">🌟💲 Dodollar 💲🌟 </h1>
 
 <br />
 
@@ -7,6 +7,20 @@
 <br />
 
 ![boy](public/boy.png)
+
+## Table of Contents
+- [Docs](#docs)
+  - [Installation](#installation)
+  - [Basic Usage](#basic-usage)
+  - [Method Chaining](#method-chaining)
+  - [Extended Utilities](#extended-utilities)
+    - [`title` method](#title-method)
+    - [`blankLine` method](#blankline-method)
+    - [`start` and `end` methods](#start-and-end-methods)
+    - [`separate`](#separate)
+  - [Road Map](#road-map)
+  - [Author](#author)
+  - [License](#license)
 
 # Docs
 
