@@ -72,9 +72,7 @@ $$.log('foo');
 ## Method Chaining
 
 ```ts
-$$.log('foo')
-  .warn('baz')
-  .error('xyzzy');
+$$.log('foo').warn('baz').error('xyzzy');
 ```
 
 Output:
@@ -86,11 +84,7 @@ Output:
 There are some extended utilities for convenience.
 
 ```ts
-$$.separate()
-  .title('Debug point')
-  .blankLine()
-  .log('foo')
-  .separate();
+$$.separate().title('Debug point').blankLine().log('foo').separate();
 ```
 
 Output:
@@ -116,10 +110,7 @@ Output blank lines. accept a number to indicate count of blank line.
 Same as `console.group()` and `console.groupEnd()` make the multiply output line becomes a group and you can easily collapse it:
 
 ```ts
-$$.start('Start')
-  .title('Hello DoDollar')
-  .separate()
-  .end();
+$$.start('Start').title('Hello DoDollar').separate().end();
 ```
 
 Output:
@@ -131,9 +122,7 @@ Output:
 Output one line separator， dash( `-` ) as separator character and maximum number is `80` by default.
 
 ```ts
-$$.separate()
-  .separate('*')
-  .separate('_-', 150);
+$$.separate().separate('*').separate('_-', 150);
 ```
 
 Output:
@@ -187,7 +176,8 @@ const myDoDollar = new DoDollar({
 
 export default myDoDollar;
 ```
-Deliver custom hooks into `DoDollar` constructor. 
+
+Deliver custom hooks into `DoDollar` constructor.
 Import your custom dodollar:
 
 ```ts
@@ -201,7 +191,6 @@ $$.log('I own beforeLog()')
 ```
 
 ![](public/lifecycle%20hooks.png)
-
 
 ## Road Map
 
