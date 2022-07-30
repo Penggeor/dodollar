@@ -1,6 +1,6 @@
 {
   "name": "dodollar",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lightweight, methods chaining, extended, well-encapsulated output console.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -20,7 +20,9 @@
     "url": "git+https://github.com/Penggeor/dodollar.git"
   },
   "keywords": [
-    "javascript"
+    "javascript",
+    "console",
+    "log"
   ],
   "author": "Pandy",
   "license": "MIT",
