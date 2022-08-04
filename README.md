@@ -61,13 +61,16 @@ $$.log('foo');
 //> foo
 ```
 
-> DoDollar compatible with commonly used five methods:
+> DoDollar compatible with commonly used several methods:
 >
 > 1. `log`
 > 2. `info`
 > 3. `debug`
 > 4. `warn`
 > 5. `error`
+> 6. `time`
+> 7. `timeLog`
+> 8. `timeEnd`
 
 ## Method Chaining
 
@@ -196,8 +199,9 @@ $$.log('I own beforeLog()')
 
 The list below should give some indication of my plans for the next major release, and for the future.
 
-1. Chinese version for docs.
-2. Setting hook in batches according to different environment.
+- [x] Setting hook in batches according to different environment.
+- [ ] Chinese version docs.
+
 
 ## Author
 

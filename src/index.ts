@@ -31,6 +31,18 @@ class DoDollar implements LightConsole {
     console.debug(...data);
     return this;
   }
+  time(label?: string) {
+    console.time(label);
+    return this;
+  }
+  timeEnd(label?: string) {
+    console.timeEnd(label);
+    return this;
+  }
+  timeLog(label?: string | undefined, ...data: any[]) {
+    console.timeLog(label, ...data);
+    return this;
+  }
   title(title: string) {
     console.log(`# ${title}`);
     return this;

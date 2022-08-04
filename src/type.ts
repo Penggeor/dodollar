@@ -1,15 +1,17 @@
-export type PartialNativeConsolePropertiesName = Extract<
+type PartialNativeConsolePropertiesName = Extract<
   keyof Console,
-  'log' | 'info' | 'debug' | 'warn' | 'error'
+  'log' | 'info' | 'debug' | 'warn' | 'error' | 'time' | 'timeEnd' | 'timeLog'
 >;
 
-export type PartialNativeConsole = {
+type PartialNativeConsole = {
   [Name in PartialNativeConsolePropertiesName]: (
-    ...data: any[]
+    ...data: Console[Name] extends (...args: any) => any
+      ? Parameters<Console[Name]>
+      : any
   ) => LightConsole;
 };
 
-export interface ExtensiveConsole {
+interface ExtensiveConsole {
   /**
    * Set the title for current output stream.
    * @param data as title
@@ -36,30 +38,73 @@ export interface ExtensiveConsole {
   separate: (separator?: string, maxFillCharacters?: number) => LightConsole;
 }
 
-export interface LightConsole extends PartialNativeConsole, ExtensiveConsole {}
+export type LightConsole = PartialNativeConsole & ExtensiveConsole;
 
-export enum ConsoleLifeCyclePointCuts {
+export enum PointCut {
   intercept = 'intercept',
   before = 'before',
   after = 'after',
+  batchIntercept = 'batchIntercept',
+  batchBefore = 'batchBefore',
+  batchAfter = 'batchAfter',
 }
 
-export type Intercept = Partial<{
-  [K in keyof LightConsole as `${ConsoleLifeCyclePointCuts.intercept}${Capitalize<K>}`]: () => boolean;
+type InterceptHook = Partial<{
+  [K in keyof LightConsole as `${PointCut.intercept}${Capitalize<K>}`]: () => boolean;
 }>;
 
-export type Before = Partial<{
-  [K in keyof LightConsole as `${ConsoleLifeCyclePointCuts.before}${Capitalize<K>}`]: () => void;
+type BeforeHook = Partial<{
+  [K in keyof LightConsole as `${PointCut.before}${Capitalize<K>}`]: () => void;
 }>;
 
-export type After = Partial<{
-  [K in keyof LightConsole as `${ConsoleLifeCyclePointCuts.after}${Capitalize<K>}`]: () => void;
+type AfterHook = Partial<{
+  [K in keyof LightConsole as `${PointCut.after}${Capitalize<K>}`]: () => void;
+}>;
+
+export type BatchInterceptHook = () => boolean;
+export type BatchBeforeOrAfterHook = () => void;
+
+export type BatchHook = Partial<{
+  [PointCut.batchIntercept]:
+    | {
+        batchInterceptHook: BatchInterceptHook;
+      }
+    | {
+        batchInterceptHook: BatchInterceptHook;
+        include: Array<keyof LightConsole>;
+      }
+    | {
+        batchInterceptHook: BatchInterceptHook;
+        exclude: Array<keyof LightConsole>;
+      };
+
+  [PointCut.batchBefore]:
+    | {
+        batchBeforeHook: BatchBeforeOrAfterHook;
+        include?: Array<keyof LightConsole>;
+      }
+    | {
+        batchBeforeHook: BatchBeforeOrAfterHook;
+        exclude?: Array<keyof LightConsole>;
+      };
+  [PointCut.batchAfter]:
+    | {
+        batchAfterHook: BatchBeforeOrAfterHook;
+        include?: Array<keyof LightConsole>;
+      }
+    | {
+        batchAfterHook: BatchBeforeOrAfterHook;
+        exclude?: Array<keyof LightConsole>;
+      };
 }>;
 
 /**
  * Hooks in prefix with `after-` `before-` didn't side effect for main logic.
  * Meanwhile, hooks in `intercept-` will block main logic if `intercept-` condition is true.
  */
-export interface ConsoleLifeCycle extends Intercept, Before, After {}
+export type ConsoleLifeCycle = InterceptHook &
+  BeforeHook &
+  AfterHook &
+  BatchHook;
 
-export interface LightConsoleConfig extends ConsoleLifeCycle {}
+export type LightConsoleConfig = ConsoleLifeCycle;

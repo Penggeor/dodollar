@@ -1,7 +1,10 @@
 import {
+  BatchBeforeOrAfterHook,
+  BatchHook,
+  BatchInterceptHook,
   ConsoleLifeCycle,
   LightConsole,
-  ConsoleLifeCyclePointCuts,
+  PointCut,
 } from './type';
 
 export function capitalize<T extends string = string>(
@@ -24,7 +27,7 @@ export function isEmptyObject(o: unknown) {
   }
 
   if (typeof o !== 'object') {
-    throw new Error('');
+    throw new Error(`${o} isn't an object.`);
   }
 
   if (o === null) {
@@ -37,7 +40,7 @@ export function isEmptyObject(o: unknown) {
 /**
  * Add life cycle hooks for every method by AOP.
  * @param target
- * @param hooks [function interceptXxx(){}..., function afterXxx(){}, ..., function beforeXxx(){}, ...]
+ * @param hooks [function interceptXxx(){}..., function afterXxx(){}, ..., function beforeXxx(){}, ..., function batchInterceptXxx(){},..., function batchXxxXxx(){},...]
  */
 export function addLifeCycleHooks(
   target: LightConsole,
@@ -49,43 +52,86 @@ export function addLifeCycleHooks(
 
   if (!hooks || Object.keys(hooks).length <= 0) return targetWithHooks;
 
-  // Collect all methods need to trigger hook
-  const methods: Array<keyof LightConsole> = [];
-  for (const hookName of Object.keys(hooks) as Array<keyof LightConsole>) {
-    methods.push(
-      hookName
-        .replace(ConsoleLifeCyclePointCuts.intercept, '')
-        .replace(ConsoleLifeCyclePointCuts.before, '')
-        .replace(ConsoleLifeCyclePointCuts.after, '')
-        .toLowerCase() as keyof LightConsole,
-    );
-  }
+  // Iterate all method to attach hooks.
+  for (const methodName of Object.keys(Object.getPrototypeOf(target)) as Array<keyof LightConsole>) {
+    const interceptHooks: Array<BatchInterceptHook> = [];
+    const beforeHooks: Array<BatchBeforeOrAfterHook> = [];
+    const afterHooks: Array<BatchBeforeOrAfterHook> = [];
 
-  // Attach the life cycle hooks.
-  for (const funcName of methods) {
-    const interceptHook =
-      hooks[`${ConsoleLifeCyclePointCuts.intercept}${capitalize(funcName)}`];
+    // Decompose batch hooks.
+    const { batchIntercept, batchBefore, batchAfter } = hooks;
+    const passBatchIntercept = executeRule(batchIntercept, methodName);
+    const passBatchBefore = executeRule(batchBefore, methodName);
+    const passBatchAfter = executeRule(batchAfter, methodName);
+    if (passBatchIntercept) {
+      interceptHooks.push(passBatchIntercept.batchInterceptHook);
+    }
+    if (passBatchBefore) {
+      beforeHooks.push(passBatchBefore.batchBeforeHook);
+    }
+    if (passBatchAfter) {
+      afterHooks.push(passBatchAfter.batchAfterHook);
+    }
 
-    const beforeHook =
-      hooks[`${ConsoleLifeCyclePointCuts.before}${capitalize(funcName)}`];
+    // Decompose intercept, before, after hooks.
+    if (hooks[`${PointCut.intercept}${capitalize(methodName)}`] !== undefined) {
+      interceptHooks.push(
+        hooks[`${PointCut.intercept}${capitalize(methodName)}`]!,
+      );
+    }
+    if (hooks[`${PointCut.before}${capitalize(methodName)}`] !== undefined) {
+      beforeHooks.push(hooks[`${PointCut.before}${capitalize(methodName)}`]!);
+    }
+    if (hooks[`${PointCut.after}${capitalize(methodName)}`] !== undefined) {
+      afterHooks.push(hooks[`${PointCut.after}${capitalize(methodName)}`]!);
+    }
 
-    const afterHook =
-      hooks[`${ConsoleLifeCyclePointCuts.after}${capitalize(funcName)}`];
-
-    targetWithHooks[funcName] = (...data: any[]) => {
-      if (interceptHook && interceptHook()) {
+    // Attach hook to each lifecycle.
+    targetWithHooks[methodName] = (...data: any[]) => {
+      if (interceptHooks && interceptHooks.some((hook) => hook())) {
         return targetWithHooks;
       }
 
-      beforeHook && beforeHook();
+      beforeHooks && beforeHooks.map((hook) => hook());
 
-      target[funcName].apply(target, data);
+      target[methodName].apply(target, data);
 
-      afterHook && afterHook();
+      afterHooks && afterHooks.map((hook) => hook());
 
       return targetWithHooks;
     };
   }
 
   return targetWithHooks;
+}
+
+function executeRule<
+  H extends
+    | BatchHook[PointCut.batchIntercept]
+    | BatchHook[PointCut.batchBefore]
+    | BatchHook[PointCut.batchAfter],
+>(oneOfBatchHook: H, methodName: keyof LightConsole): H | undefined {
+  if (oneOfBatchHook) {
+    // Conditional attach batch hooks according to rules.
+    if ('include' in oneOfBatchHook && 'exclude' in oneOfBatchHook) {
+      throw Error('Not allow exist include and exclude rule at the same time.');
+    } else if ('include' in oneOfBatchHook) {
+      // methodName should in the include rule
+      if (oneOfBatchHook.include && oneOfBatchHook.include.length > 0) {
+        if (oneOfBatchHook.include.includes(methodName)) {
+          return oneOfBatchHook;
+        }
+      }
+    } else if ('exclude' in oneOfBatchHook) {
+      // methodName should not in the exclude rule
+      if (oneOfBatchHook.exclude && oneOfBatchHook.exclude.length > 0) {
+        if (!oneOfBatchHook.exclude.includes(methodName)) {
+          return oneOfBatchHook;
+        }
+      }
+    } else {
+      // Default to include if there no any rules setting.
+      return oneOfBatchHook;
+    }
+  }
 }
