@@ -24,6 +24,7 @@
     - [Concept](#concept)
     - [Usage](#usage)
     - [Setting in batch](#setting-in-batch)
+    - [Include and Exclude](#include-and-exclude)
   - [Road Map](#road-map)
   - [Author](#author)
   - [License](#license)
@@ -185,29 +186,31 @@ With help of lifecycle hook, you can build custom console output for your page o
 // myDoDollar.ts
 
 import { DoDollar } from 'dodollar';
-import $$ from 'dodollar';
+import dodollar from 'dodollar';
 
-const myDoDollar = new DoDollar({
+const $$ = new DoDollar({
   beforeLog: () => {
-    $$.log('before log...');
+    dodollar.log('before log...');
   },
   afterError: () => {
-    $$.log('Report error to server...');
+    dodollar.log('Report error to server...');
   },
   interceptInfo: () => {
-    $$.log('Intercept execution in production environment.');
+    dodollar.log('Intercept execution in production environment.');
     return true;
   },
 });
 
-export default myDoDollar;
+export { $$ };
 ```
+
+> Don't use `$$`, the DoDollar instance your just create, in hooks which will cause cyclic invoke. 
 
 Deliver custom hooks into `DoDollar` constructor.
 Import your custom dodollar:
 
 ```ts
-import $$ from './myDodollar';
+import { $$ } from './myDodollar';
 
 $$.log('I own beforeLog()')
   .blankLine()
@@ -222,17 +225,84 @@ $$.log('I own beforeLog()')
 
 DoDollar support to setting lifecycle hooks in batch by config `batchIntercept`, `batchBefore`, and `batchAfter`:
 
+Build your custom DoDollar instance:
 
+```ts
+import { isProduction } from '@/utils.ts';
+import { DoDollar } from 'dodollar';
+import dodollar from 'dodollar';
+
+const $$ = new DoDollar({
+  batchIntercept: {
+    batchInterceptHook: () => {
+      // Intercept every output when in the production environment.
+      if (isProduction() === true) {
+        return true;
+      }
+      return false;
+    },
+  },
+  batchBefore: {
+    batchBeforeHook: () => {
+      dodollar
+        .log('I am monitor every methods before hook execution.')
+        .separate();
+    },
+  },
+  batchAfter: {
+    batchAfterHook: () => {
+      dodollar
+        .log('Ok, I finish my monitor after hook execution.')
+        .separate('*');
+    },
+  },
+});
+
+export { $$ };
+```
+
+Use it:
+
+```ts
+const data = {
+  name: 'Jack',
+  age: 18,
+};
+
+$$.fold(data);
+```
+
+![fold 1-2](public/fold%201-2.png)
+
+### Include and Exclude
+
+By default, batch hook will effect to every methods. With `include` and `exclude`, you can specify certain methods:
+
+For example, you can add **exclude rule** that allow `error()` methods output when in production environment:
+
+```ts
+const $$ = new DoDollar({
+  batchIntercept: {
+    batchInterceptHook: () => {
+      if (isProduction() === true) {
+        return true;
+      }
+      return false;
+    },
+    exclude: ["error"],
+  },
+});
+```
 
 ## Road Map
 
 The list below should give some indication of my plans for the next major release, and for the future.
 
 - [x] Setting hook in batches according to different environment.
+- [x] Add batch hooks user docs.
+- [x] `fold` : same as $$.start().log().end()
 - [ ] Chinese version docs.
 - [ ] Print complex data structure entirely.
-- [ ] Add batch hooks user docs.
-- [ ] `fold` : same as $$.start().log().end()
 
 ## Author
 
