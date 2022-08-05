@@ -18,10 +18,12 @@
     - [`title` method](#title-method)
     - [`blankLine` method](#blankline-method)
     - [`start` and `end` methods](#start-and-end-methods)
+    - [`fold` : integrate `start` and `end`](#fold--integrate-start-and-end)
     - [`separate`](#separate)
   - [Lifecycle Hooks](#lifecycle-hooks)
     - [Concept](#concept)
     - [Usage](#usage)
+    - [Setting in batch](#setting-in-batch)
   - [Road Map](#road-map)
   - [Author](#author)
   - [License](#license)
@@ -120,6 +122,27 @@ Output:
 
 ![start and end](public/start%20and%20end.png)
 
+### `fold` : integrate `start` and `end`
+
+If you just want to print a group output, you need the `start()`, `end()`, and middle method `log()` :
+
+```ts
+const data = {
+  name: 'Jack',
+  age: 18,
+};
+
+$$.start().log(data).end();
+```
+
+![fold 1-1](public/fold%201-1.png)
+
+Equal to `$$.start().log(data).end()`, `fold()` help out this weary code then you can quickly create a group output:
+
+```ts
+$$.fold();
+```
+
 ### `separate`
 
 Output one line separator， dash( `-` ) as separator character and maximum number is `80` by default.
@@ -195,13 +218,21 @@ $$.log('I own beforeLog()')
 
 ![](public/lifecycle%20hooks.png)
 
+### Setting in batch
+
+DoDollar support to setting lifecycle hooks in batch by config `batchIntercept`, `batchBefore`, and `batchAfter`:
+
+
+
 ## Road Map
 
 The list below should give some indication of my plans for the next major release, and for the future.
 
 - [x] Setting hook in batches according to different environment.
 - [ ] Chinese version docs.
-
+- [ ] Print complex data structure entirely.
+- [ ] Add batch hooks user docs.
+- [ ] `fold` : same as $$.start().log().end()
 
 ## Author
 

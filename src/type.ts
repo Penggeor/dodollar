@@ -31,6 +31,11 @@ interface ExtensiveConsole {
    */
   end: () => LightConsole;
   /**
+   * Same as $$.start().log(data).end(), you can easily
+   * create one group.
+   */
+  fold: (...data: any[]) => LightConsole;
+  /**
    * Output a separate line, use `separator` or `-` by default.
    * @param separator
    * @param maxFillCharacters One line with character count.

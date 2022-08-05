@@ -59,6 +59,11 @@ class DoDollar implements LightConsole {
     console.groupEnd();
     return this;
   }
+  fold(...data: any[]) {
+    return this.start()
+      .log(...data)
+      .end();
+  }
   separate(separator?: string, maxFillCharacters = 80) {
     let separatorArray = ['-'];
     if (separator !== undefined && separator.length > 0) {

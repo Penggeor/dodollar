@@ -53,7 +53,9 @@ export function addLifeCycleHooks(
   if (!hooks || Object.keys(hooks).length <= 0) return targetWithHooks;
 
   // Iterate all method to attach hooks.
-  for (const methodName of Object.keys(Object.getPrototypeOf(target)) as Array<keyof LightConsole>) {
+  for (const methodName of Object.keys(Object.getPrototypeOf(target)) as Array<
+    keyof LightConsole
+  >) {
     const interceptHooks: Array<BatchInterceptHook> = [];
     const beforeHooks: Array<BatchBeforeOrAfterHook> = [];
     const afterHooks: Array<BatchBeforeOrAfterHook> = [];
